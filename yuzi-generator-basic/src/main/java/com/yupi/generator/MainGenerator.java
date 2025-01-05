@@ -30,7 +30,7 @@ public class MainGenerator {
         MainTemplateConfig mainTemplateConfig = new MainTemplateConfig();
         mainTemplateConfig.setAuthor("yupi3");
         //不使用循环
-        mainTemplateConfig.setLoop(true);
+        mainTemplateConfig.setLoop(false);
         mainTemplateConfig.setOutputText("求和结果3：");
         doGenerate(mainTemplateConfig);
     }

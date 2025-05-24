@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class MainGenerator {
     public static void main(String[] args) throws TemplateException, IOException, InterruptedException {
+        // 测试能否获取到meta对象
         Meta meta = MetaManager.getMetaObject();
         // System.out.println(meta);
 
@@ -28,6 +29,15 @@ public class MainGenerator {
         if(!FileUtil.exist(outputPath)){
             FileUtil.mkdir(outputPath);
         }
+
+        //复制原始文件
+        String sourceRootPath = meta.getFileConfig().getSourceRootPath();
+        // d:/IdeaProjects/yuzi-generator/yuzi-generator-demo-projects/acm-template-pro/
+        // System.out.println(sourceRootPath);
+        String sourceCopyDestPath = outputPath + File.separator + ".source" ;
+        // D:\IdeaProjects\yuzi-generator\yuzi-generator-maker\generated\acm-template-pro-generator\.source
+        // System.out.println(sourceCopyDestPath);
+        FileUtil.copy(sourceRootPath, sourceCopyDestPath, false);
 
         // 读取resourcees目录
         ClassPathResource classPathResource = new ClassPathResource("");
@@ -99,6 +109,10 @@ public class MainGenerator {
         outputFilePath = outputPath + "\\pom.xml";
         DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);
 
+        // README.md
+        inputFilePath = inputResourcePath + File.separator + "templates/README.md.ftl";
+        outputFilePath = outputPath + "\\README.md";
+        DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);
         // 构建jar包
         JarGenerator.doGenerate(outputPath);
 
@@ -108,5 +122,17 @@ public class MainGenerator {
         String jarPath = "target/" + jarName;
         ScriptGenerator.doGenerate(shellOutputFilePath, jarPath);
 
+        // 生成精简版的程序（产物包）
+        String distOutputPath = outputPath + "-dist";
+        // 拷贝jar包
+        String targetAbsolutePath = distOutputPath + File.separator + "target";
+        FileUtil.mkdir(targetAbsolutePath);
+        String jarAbsolutePath = outputPath + File.separator + jarPath ;
+        FileUtil.copy(jarAbsolutePath,targetAbsolutePath,true);
+        // 拷贝脚本文件
+        FileUtil.copy(shellOutputFilePath,distOutputPath,true);
+        FileUtil.copy(shellOutputFilePath + ".bat",distOutputPath,true);
+        // 拷贝源模板文件
+        FileUtil.copy(sourceCopyDestPath,distOutputPath,true);
     }
 }

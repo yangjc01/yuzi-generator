@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 /*
-* 核心生成器
+* 核心生成器，用来辅助生成MainGenerator.java.ftl模板文件用的。
 * */
 public class MainGenerator {
     public static void doGenerate(Object model) throws TemplateException, IOException {

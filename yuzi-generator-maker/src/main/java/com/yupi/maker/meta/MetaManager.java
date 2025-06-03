@@ -25,7 +25,9 @@ public class MetaManager {
         String metaJson = ResourceUtil.readUtf8Str("meta.json");
         Meta newMeta = JSONUtil.toBean(metaJson,Meta.class);
         // 访问Meta对象中文件配置的方法
-        Meta.FileConfig fileConfig = newMeta.getFileConfig();
+        //Meta.FileConfig fileConfig = newMeta.getFileConfig();
+        // meta基础信息校验
+        MetaValidator.doValidAndFill(newMeta);
         return newMeta;
     }
 }

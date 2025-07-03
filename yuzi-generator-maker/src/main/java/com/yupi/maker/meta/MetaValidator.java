@@ -81,6 +81,11 @@ public class MetaValidator {
             return;
         }
         for(Meta.FileConfig.FileInfo fileInfo : fileInfoList){
+            String type = fileInfo.getType();
+            // 类型未group，不校验文件输入输出路径等信息，但是组里面的文件需要校验，此处没有校验，待优化。
+            if(FileTypeEnum.GROUP.getValue().equals(type)){
+                continue;
+            }
             // inputPath 必填
             String inputPath = fileInfo.getInputPath();
             if(StrUtil.isBlank(inputPath)){
@@ -93,8 +98,8 @@ public class MetaValidator {
                 fileInfo.setOutputPath(inputPath);
             }
 
-            //type : 默认有后缀 如文件后缀 .java 为file ,否则为dir
-            String type = fileInfo.getType();
+            // type : 默认有后缀 如文件后缀 .java 为file ,否则为dir
+            // String type = fileInfo.getType();
             if(StrUtil.isBlank(type)){
                 // fileInfo.setType("dir");
                 fileInfo.setType(FileTypeEnum.DIR.getValue());

@@ -17,7 +17,7 @@ generator <命令> <选项参数>
 ```
 示例命令：
 ```
-generator generate -l -a -o 
+generator generate -l -n -a -o 
 ```
 
 ## 参数说明
@@ -30,7 +30,16 @@ generator generate -l -a -o
 默认值：false
 
 缩写：-l
-2）author
+2）needGit
+
+类型：boolean
+
+描述：是否生成.gitignore文件
+
+默认值：true
+
+缩写：-n
+3）author
 
 类型：String
 
@@ -39,7 +48,7 @@ generator generate -l -a -o
 默认值："yupi"
 
 缩写：-a
-3）outputText
+4）outputText
 
 类型：String
 

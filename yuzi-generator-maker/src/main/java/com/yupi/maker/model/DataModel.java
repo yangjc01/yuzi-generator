@@ -10,4 +10,6 @@ public class DataModel {
     private String author = "yupi";
     //输出信息
     private String outputText = "sum = ";
+    // 是否生成.gitignore文件
+    private boolean needGit;
 }

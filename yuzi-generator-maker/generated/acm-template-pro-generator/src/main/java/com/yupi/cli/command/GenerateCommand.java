@@ -14,6 +14,8 @@ public class GenerateCommand implements Callable<Integer> {
 
         @Option(names = {"-l", "-loop"}, arity="0..1", description = "是否生成循环", interactive = true , echo=true)
         private boolean loop =false;
+        @Option(names = {"-n", "-needGit"}, arity="0..1", description = "是否生成.gitignore文件", interactive = true , echo=true)
+        private boolean needGit =true;
         @Option(names = {"-a", "-author"}, arity="0..1", description = "作者注释", interactive = true , echo=true)
         private String author ="yupi";
         @Option(names = {"-o", "-outputText"}, arity="0..1", description = "输出信息", interactive = true , echo=true)

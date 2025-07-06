@@ -11,6 +11,7 @@ import com.yupi.maker.meta.enums.ModelTypeEnum;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MetaValidator {
     public static void doValidAndFill(Meta meta){
@@ -28,6 +29,17 @@ public class MetaValidator {
         List<Meta.ModelConfig.ModelInfo> modelInfoList = modelConfig.getModels();
         if(CollectionUtil.isNotEmpty(modelInfoList)){
             for(Meta.ModelConfig.ModelInfo modelInfo : modelInfoList){
+                // 为group , 不校验
+                String groupKey = modelInfo.getGroupKey();
+                if(StrUtil.isNotEmpty(groupKey)){
+                    List<Meta.ModelConfig.ModelInfo> subModelInfoList = modelInfo.getModels();
+                    String allArgsStr = subModelInfoList.stream()
+                            .map(subModelInfo -> String.format("\"-%s\"",subModelInfo.getFieldName()))
+                            .collect(Collectors.joining(", "));
+                    System.out.println(allArgsStr);
+                    modelInfo.setAllArgsStr(allArgsStr);
+                    continue;
+                }
                 // 输出路径默认值
                 String fieldName = modelInfo.getFieldName();
                 if(StrUtil.isBlank(fieldName)){

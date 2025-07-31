@@ -2,6 +2,7 @@
 .idea
 target
 generated
+.temp
 yuzi-generator.iml
 
 ### Java template

@@ -24,7 +24,9 @@ public class TemplateMakerModelConfig {
     @Data
     public static class ModelGroupConfig {
         private String condition ;
-        private String groupKye;
+        private String groupKey;
         private String groupName;
+        private String type;
+        private String description;
     }
 }

@@ -10,12 +10,9 @@ import cn.hutool.json.JSONUtil;
 import com.yupi.maker.meta.Meta;
 import com.yupi.maker.meta.enums.FileGenerateTypeEnum;
 import com.yupi.maker.meta.enums.FileTypeEnum;
-import com.yupi.maker.template.model.FileFilterConfig;
-import com.yupi.maker.template.model.TemplateMakerConfig;
-import com.yupi.maker.template.model.TemplateMakerFileConfig;
+import com.yupi.maker.template.model.*;
 import com.yupi.maker.template.enums.FileFilterRangeEnum;
 import com.yupi.maker.template.enums.FileFilterRuleEnum;
-import com.yupi.maker.template.model.TemplateMakerModelConfig;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -32,15 +29,16 @@ public class TemplateMaker {
         String originProjectPath = templateMakerConfig.getOriginProjectPath();
         TemplateMakerFileConfig templateMakerFileConfig = templateMakerConfig.getFileConfig();
         TemplateMakerModelConfig templateMakerModelConfig = templateMakerConfig.getModelConfig();
+        TemplateMakerOutputConfig templateMakerOutputConfig = templateMakerConfig.getOutputConfig();
         Long id = templateMakerConfig.getId();
-        return  makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,id);
+        return  makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,templateMakerOutputConfig,id);
     }
 
     /**
     * 制作文件模板
     * */
 
-    private static Meta.FileConfig.FileInfo makeFileTemplate(TemplateMakerModelConfig templateMakerModelConfig,String sourceRootPath,File inputFile){
+    private static Meta.FileConfig.FileInfo makeFileTemplate(TemplateMakerModelConfig templateMakerModelConfig,String sourceRootPath,File inputFile,TemplateMakerFileConfig.FileInfoConfig fileInfoConfig){
         // 要挖坑的文件的绝对路径（用于制作模板）
         // 注意win系统需要对路径的转义
         String fileInputAbsolutePath = inputFile.getAbsolutePath().replaceAll("\\\\","/");
@@ -69,7 +67,7 @@ public class TemplateMaker {
                 replacement = String.format("${%s}",modelInfoConfig.getFieldName());
             } else {
                 // 是分组
-                String groupKey = modelGroupConfig.getGroupKye();
+                String groupKey = modelGroupConfig.getGroupKey();
                 // 注意挖坑要多挖一个层级
                 replacement = String.format("${%s.%s}",groupKey,modelInfoConfig.getFieldName());
             }
@@ -81,6 +79,7 @@ public class TemplateMaker {
         // 注意文件输入路径要和输入路径反转，ftl模板路径要放到setInputPath中，方便以后生成模板文件。
         fileInfo.setInputPath(fileOutputPath);
         fileInfo.setOutputPath(fileInputPath);
+        fileInfo.setCondition(fileInfoConfig.getCondition());
         fileInfo.setType(FileTypeEnum.FILE.getValue());
         fileInfo.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
 
@@ -111,7 +110,7 @@ public class TemplateMaker {
     * 制作模板
     * */
 
-    public static long makeTemplate(Meta newMeta, String originProjectPath, TemplateMakerFileConfig templateMakerFileConfig, TemplateMakerModelConfig templateMakerModelConfig, Long id){
+    public static long makeTemplate(Meta newMeta, String originProjectPath, TemplateMakerFileConfig templateMakerFileConfig, TemplateMakerModelConfig templateMakerModelConfig, TemplateMakerOutputConfig templateMakerOutputConfig, Long id){
         // 没有id则生成
         if(id == null){
             id = IdUtil.getSnowflakeNextId();
@@ -135,7 +134,16 @@ public class TemplateMaker {
         //2.输入文件信息
         // FileUtil.getLastPathEle 取originProjectPath的最后一级目录： acm-template
         // D:\IdeaProjects\yuzi-generator\yuzi-generator-maker\.temp\1945258343145541632\acm-template
-        String sourceRootPath = templatePath + File.separator + FileUtil.getLastPathEle(Paths.get(originProjectPath)).toString();
+        // String sourceRootPath = templatePath + File.separator + FileUtil.getLastPathEle(Paths.get(originProjectPath)).toString();
+        // 持久化项目路径
+        String sourceRootPath = FileUtil.loopFiles(new File(templatePath),1,null)
+                .stream()
+                .filter(File::isDirectory)
+                .findFirst()
+                .orElseThrow(RuntimeException::new)
+                .getAbsolutePath();
+        // sourceRootPath的路径是：D:\IdeaProjects\yuzi-generator\yuzi-generator-maker\.temp\1952328595080663040\springboot-init
+        // System.out.println("sourceRootPath的路径是："+sourceRootPath);
         // win系统需要对路径进行转义
         sourceRootPath = sourceRootPath.replaceAll("\\\\","/");
 
@@ -176,7 +184,16 @@ public class TemplateMaker {
             modelConfig.setModels(modelInfoList);
             modelInfoList.addAll(newModelInfoList);
         }
-        // 2. 输出元信息文件
+        // 2. 额外的输出配置
+        if(templateMakerOutputConfig != null){
+            // 文件外层和分组去重
+            if(templateMakerOutputConfig.isRemoveGroupFilesFromRoot()){
+                List<Meta.FileConfig.FileInfo> fileInfoList = newMeta.getFileConfig().getFiles();
+                newMeta.getFileConfig().setFiles(TemplateMakerUtils.removeGroupFilesFromRoot(fileInfoList));
+            }
+        }
+
+        // 3. 输出元信息文件
         FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(newMeta),metaOutputPath);
 
         return id;
@@ -207,14 +224,15 @@ public class TemplateMaker {
         // 如果是模型组
         TemplateMakerModelConfig.ModelGroupConfig modelGroupConfig = templateMakerModelConfig.getModelGroupConfig();
         if(modelGroupConfig != null ){
-            String condition = modelGroupConfig.getCondition();
-            String groupKey = modelGroupConfig.getGroupKye();
-            String groupName = modelGroupConfig.getGroupName();
-
+//            String condition = modelGroupConfig.getCondition();
+//            String groupKey = modelGroupConfig.getGroupKey();
+//            String groupName = modelGroupConfig.getGroupName();
+            // 复制变量(通过复制变量的方式给groupModelInfo赋值)
             Meta.ModelConfig.ModelInfo groupModelInfo =  new Meta.ModelConfig.ModelInfo();
-            groupModelInfo.setGroupKey(groupKey);
-            groupModelInfo.setGroupName(groupName);
-            groupModelInfo.setCondition(condition);
+            BeanUtil.copyProperties(modelGroupConfig,groupModelInfo);
+//            groupModelInfo.setGroupKey(groupKey);
+//            groupModelInfo.setGroupName(groupName);
+//            groupModelInfo.setCondition(condition);
 
             // 模型全放到一个分组内
             groupModelInfo.setModels(inputModelInfoList);
@@ -270,7 +288,7 @@ public class TemplateMaker {
             // 不处理已生成的ftl模板文件
             fileList = fileList.stream().filter(file->!file.getAbsolutePath().endsWith(".ftl")).collect(Collectors.toList());
             for(File file : fileList){
-                Meta.FileConfig.FileInfo fileInfo = makeFileTemplate(templateMakerModelConfig, sourceRootPath,file);
+                Meta.FileConfig.FileInfo fileInfo = makeFileTemplate(templateMakerModelConfig, sourceRootPath,file,fileInfoConfig);
                 newFileInfoList.add(fileInfo);
             }
         }

@@ -5,10 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.yupi.maker.meta.Meta;
 import com.yupi.maker.template.enums.FileFilterRangeEnum;
 import com.yupi.maker.template.enums.FileFilterRuleEnum;
-import com.yupi.maker.template.model.FileFilterConfig;
-import com.yupi.maker.template.model.TemplateMakerConfig;
-import com.yupi.maker.template.model.TemplateMakerFileConfig;
-import com.yupi.maker.template.model.TemplateMakerModelConfig;
+import com.yupi.maker.template.model.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -63,7 +60,7 @@ public class TemplateMakerTest {
 
         // 模型组配置
         TemplateMakerModelConfig.ModelGroupConfig modelGroupConfig = new TemplateMakerModelConfig.ModelGroupConfig();
-        modelGroupConfig.setGroupKye("mysql");
+        modelGroupConfig.setGroupKey("mysql");
         modelGroupConfig.setGroupName("数据库配置");
         templateMakerModelConfig.setModelGroupConfig(modelGroupConfig);
 
@@ -110,8 +107,8 @@ public class TemplateMakerTest {
         templateMakerFileConfig.setFileGroupConfig(fileGroupConfig);
 
         // 测试文件过滤
-        long id = TemplateMaker.makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,1945478580362158080L);
-        System.out.println(id);
+        long id = TemplateMaker.makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,null,1945478580362158080L);
+        System.out.println("id的值为："+id);
     }
 
     /**
@@ -152,8 +149,8 @@ public class TemplateMakerTest {
 
         templateMakerModelConfig.setModels(modelInfoConfigList);
 
-        long id = TemplateMaker.makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,1945478580362158080L);
-        System.out.println(id);
+        long id = TemplateMaker.makeTemplate(meta,originProjectPath,templateMakerFileConfig,templateMakerModelConfig,null,1945478580362158080L);
+        System.out.println("id的值为："+id);
     }
 
     @Test
@@ -161,6 +158,48 @@ public class TemplateMakerTest {
         String configStr = ResourceUtil.readUtf8Str("templateMaker.json");
         TemplateMakerConfig templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
         Long id = TemplateMaker.makeTemplate(templateMakerConfig);
-        System.out.println(id);
+        System.out.println("id的值为："+id);
+    }
+
+    @Test
+    public void makeSpringBootTemplate(){
+        String rootPath = "examples/springboot-init/";
+        String configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker.json");
+        TemplateMakerConfig templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        Long id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker1.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker2.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker3.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker4.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker5.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker6.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker7.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath+"templateMaker8.json");
+        templateMakerConfig = JSONUtil.toBean(configStr,TemplateMakerConfig.class);
+        TemplateMaker.makeTemplate(templateMakerConfig);
+
+        System.out.println("id的值为："+id);
     }
 }
